@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QLabel, QTabWidget, QHBoxLayout,
     QPushButton, QLineEdit, QMessageBox, QListWidget, QListWidgetItem, QFrame, QSlider
 )
-from PyQt6.QtGui import QFont, QPixmap
+from PyQt6.QtGui import QFont, QPixmap, QIcon
 from PyQt6.QtCore import Qt
 from api import NavidromeAPI
 from config import load_config, save_config
@@ -107,13 +107,17 @@ class MainWindow(QMainWindow):
         frame_layout.addWidget(self.artist_list)
         library_layout.addWidget(frame)
 
-        refresh_button = QPushButton("🔄 Refresh Library")
+        refresh_button = QPushButton("Refresh Library")
+        refresh_icon = QIcon("assets/icons/arrow-alt-circle-up.svg")
+        refresh_button.setIcon(refresh_icon)
         refresh_button.setStyleSheet("padding: 8px; font-weight: bold;")
         refresh_button.clicked.connect(self.load_artists)
         library_layout.addWidget(refresh_button)
 
-        #Play button
-        play_button = QPushButton("▶️ Play First Track")
+    # Play button
+        play_button = QPushButton("Play First Track")
+        play_icon = QIcon("assets/icons/circle-play.svg")
+        play_button.setIcon(play_icon)
         play_button.setStyleSheet("padding: 8px; font-weight: bold;")
         play_button.clicked.connect(self.play_first_track)
         library_layout.addWidget(play_button)
@@ -125,7 +129,7 @@ class MainWindow(QMainWindow):
         now_layout = QVBoxLayout()
         now_tab.setLayout(now_layout)
 
-        self.now_label = QLabel("▶️ Now Playing: nothing.")
+        self.now_label = QLabel("Now Playing: nothing.")
         self.now_label.setFont(QFont("Arial", 14))
         self.now_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.now_label.setStyleSheet("color: white; padding: 10px;")
@@ -147,15 +151,21 @@ class MainWindow(QMainWindow):
 
         controls = QHBoxLayout()
 
-        prev_button = QPushButton("⏮️")
+        prev_button = QPushButton()
+        prev_icon = QIcon("assets/icons/circle-left.svg")
+        prev_button.setIcon(prev_icon)
         prev_button.setToolTip("Previous track")
         prev_button.clicked.connect(self.play_previous_track)
 
-        play_pause_button = QPushButton("⏯️")
+        play_pause_button = QPushButton()
+        play_pause_icon = QIcon("assets/icons/circle-play.svg")
+        play_pause_button.setIcon(play_pause_icon)
         play_pause_button.setToolTip("Play / Pause")
         play_pause_button.clicked.connect(self.toggle_play_pause)
 
-        next_button = QPushButton("⏭️")
+        next_button = QPushButton()
+        next_icon = QIcon("assets/icons/circle-right.svg")
+        next_button.setIcon(next_icon)
         next_button.setToolTip("Next track")
         next_button.clicked.connect(self.play_next_track)
 
@@ -174,7 +184,7 @@ class MainWindow(QMainWindow):
         settings_layout = QVBoxLayout()
         settings_tab.setLayout(settings_layout)
 
-        theme_label = QLabel("🎨 Theme Mode")
+        theme_label = QLabel("Theme Mode")
         theme_label.setFont(QFont("Arial", 14))
         settings_layout.addWidget(theme_label)
 
@@ -185,7 +195,7 @@ class MainWindow(QMainWindow):
             theme_buttons.addWidget(btn)
         settings_layout.addLayout(theme_buttons)
 
-        login_label = QLabel("🔐 Navidrome Login")
+        login_label = QLabel("Navidrome Login")
         login_label.setFont(QFont("Arial", 14))
         settings_layout.addWidget(login_label)
 

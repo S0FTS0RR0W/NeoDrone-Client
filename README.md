@@ -11,4 +11,4 @@ A modular, mood-aware companion for your Navidrome music server—designed to fe
 - 🔐 Optional encryption for private emotional anchors
 - 🧩 Modular design (CLI, GUI, or hybrid)
 
-  ## BE AWARE THIS IS A WORK IN PROGRESS
+## BE AWARE THIS IS A WORK IN PROGRESS

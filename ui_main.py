@@ -8,7 +8,50 @@ from api import NavidromeAPI
 from config import load_config, save_config
 import vlc
 import requests
+from PyQt6.QtCore import pyqtProperty, QPropertyAnimation, QEasingCurve
+from PyQt6.QtGui import QColor, QPaintEvent, QPainter
 
+class AnimatedButton(QPushButton):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._bg_color = QColor("#3a3a3a")
+        self._hover_color = QColor("#66aaff")
+        self._current_color = self._bg_color
+        self._animation = QPropertyAnimation(self, b"bgColor", self)
+        self._animation.setDuration(220)
+        self._animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.setStyleSheet("color: white; border-radius: 8px; font-weight: bold; padding: 8px 16px; background: transparent;")
+
+    def enterEvent(self, event):
+        self._animation.stop()
+        self._animation.setStartValue(self._current_color)
+        self._animation.setEndValue(self._hover_color)
+        self._animation.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._animation.stop()
+        self._animation.setStartValue(self._current_color)
+        self._animation.setEndValue(self._bg_color)
+        self._animation.start()
+        super().leaveEvent(event)
+
+    def paintEvent(self, event: QPaintEvent):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(self._current_color)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawRoundedRect(self.rect(), 8, 8)
+        super().paintEvent(event)
+
+    def getBgColor(self):
+        return self._current_color
+
+    def setBgColor(self, color):
+        self._current_color = color
+        self.update()
+
+    bgColor = pyqtProperty(QColor, fget=getBgColor, fset=setBgColor)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -47,7 +90,22 @@ class MainWindow(QMainWindow):
     def setup_ui(self):
         # Enable UI Transparency
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setStyleSheet("background: transparent;")
+        self.setStyleSheet("background: transparent;\n"
+            "QPushButton {\n"
+            "    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);\n"
+            "    border-radius: 8px;\n"
+            "    background: #3a3a3a;\n"
+            "    color: white;\n"
+            "    padding: 8px 16px;\n"
+            "    font-weight: bold;\n"
+            "} \n"
+            "QPushButton:hover {\n"
+            "    background: #66aaff;\n"
+            "    color: #fff;\n"
+            "    box-shadow: 0 4px 16px rgba(102,170,255,0.2);\n"
+            "    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);\n"
+            "}\n"
+        )
 
         # Background image using QLabel
         bg_label = QLabel(self)
@@ -464,6 +522,20 @@ class MainWindow(QMainWindow):
 
         self.config["theme"] = mode
         save_config(self.config)
+        self.setStyleSheet("""
+    QPushButton {
+        background-color: #fbeec1;
+        color: black;
+        border: 2px solid #ffd6a5;
+        padding: 6px;
+        border-radius: 8px;
+    }
+    QPushButton:hover {
+        background-color: #ffd6a5;
+        color: white;
+        border: 2px solid #ffb347;
+    }
+    """)
 
     def set_affirmation_style(self, style):
         self.affirmation_style = style

@@ -31,11 +31,11 @@ class MainWindow(QMainWindow):
                 self.api = NavidromeAPI(server, username, password)
                 ping = self.api.ping()
                 if "subsonic-response" in ping:
-                    print("✅ Auto-connected to Navidrome.")
+                    print("Auto-connected to Navidrome.")
                 else:
-                    print("⚠️ Ping failed. Manual login may be required.")
+                    print("Ping failed. Manual login may be required.")
             except Exception as e:
-                print(f"❌ Auto-connect error: {e}")
+                print(f"Auto-connect error: {e}")
 
 
         self.offline_enabled = self.config.get("offline", False)
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         library_layout = QVBoxLayout()
         library_tab.setLayout(library_layout)
 
-        header = QLabel("✨ Explore your musical anchors")
+        header = QLabel("Explore your musical anchors")
         header.setFont(QFont("Arial", 16))
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         header.setStyleSheet("color: white; padding: 10px;")
@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
         connect_button.clicked.connect(self.connect_to_navidrome)
         settings_layout.addWidget(connect_button)
 
-        offline_label = QLabel("💾 Offline Mode")
+        offline_label = QLabel("Offline Mode")
         offline_label.setFont(QFont("Arial", 14))
         settings_layout.addWidget(offline_label)
 
@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
         offline_toggle.clicked.connect(self.toggle_offline_mode)
         settings_layout.addWidget(offline_toggle)
 
-        affirm_label = QLabel("🧘 Affirmation Style")
+        affirm_label = QLabel("Affirmation Style")
         affirm_label.setFont(QFont("Arial", 14))
         settings_layout.addWidget(affirm_label)
 
@@ -358,13 +358,13 @@ class MainWindow(QMainWindow):
                             pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                         )
                     else:
-                        print("⚠️ Pixmap is null or failed to load.")
+                        print("Pixmap is null or failed to load.")
                         self.album_art_label.setPixmap(QPixmap("assets/default_cover.png"))
                 else:
-                    print(f"❌ Failed to fetch image. Status: {response.status_code}")
+                    print(f"Failed to fetch image. Status: {response.status_code}")
                     self.album_art_label.setPixmap(QPixmap("assets/default_cover.png"))
             except Exception as e:
-                print(f"❌ Exception while fetching album art: {e}")
+                print(f"Exception while fetching album art: {e}")
                 self.album_art_label.setPixmap(QPixmap("assets/default_cover.png"))
         else:
             print(f"[DEBUG] Invalid cover_id: {cover_id}")
@@ -395,9 +395,9 @@ class MainWindow(QMainWindow):
                 if album_artist:
                     artist_name = album_artist
         if artist_name:
-            self.now_label.setText(f"▶️ Now Playing: {song_title} — {artist_name}")
+            self.now_label.setText(f"▶ Now Playing: {song_title} — {artist_name}")
         else:
-            self.now_label.setText(f"▶️ Now Playing: {song_title}")
+            self.now_label.setText(f"▶ Now Playing: {song_title}")
 
         # Store current track/album info for navigation
         self.current_track_id = song['id']

@@ -6,7 +6,7 @@ from ui_main import MainWindow
 import sys
 from api import NavidromeAPI
 
-api = NavidromeAPI("http://10.20.0.23:4533", "S0FTS0RR0W", "Gamerguy43")
+api = NavidromeAPI("http://10.20.0.24:4533", "S0FTS0RR0W", "Gamerguy43")
 
 def main():
     app = QApplication(sys.argv)

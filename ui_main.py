@@ -177,6 +177,12 @@ class MainWindow(QMainWindow):
         controls.addWidget(next_button)
         now_layout.addLayout(controls)
 
+        # Affirmation Button
+        affirmation_button = QPushButton("Get Affirmation")
+        affirmation_button.setStyleSheet("padding: 8px; font-weight: bold; margin-top: 10px;")
+        affirmation_button.clicked.connect(self.show_affirmation)
+        now_layout.addWidget(affirmation_button)
+
         tabs.addTab(now_tab, "Now Playing")
 
         # Settings Tab
@@ -242,9 +248,108 @@ class MainWindow(QMainWindow):
         settings_layout.addLayout(affirm_buttons)
 
         tabs.addTab(settings_tab, "Settings")
-
         # Auto refresh on start
         self.load_artists()
+
+    def get_affirmation(self):
+        style = self.affirmation_style
+        import random
+        gentle = [
+            "You are enough, just as you are.",
+            "Let the music soothe your soul.",
+            "Take a deep breath and enjoy this moment.",
+            "You deserve kindness, especially from yourself.",
+            "Every note is a gentle hug for your heart."
+        ]
+        playful = [
+            "Dance like nobody's buffering!",
+            "You rock harder than this playlist!",
+            "If you were a song, you'd be a hit single.",
+            "Keep grooving, superstar!",
+            "Your vibe is more contagious than this beat."
+        ]
+        poetic = [
+            "In the symphony of life, your melody matters.",
+            "Let the rhythm of hope carry you onward.",
+            "You are a verse in the song of the universe.",
+            "Every sunrise is a new chorus for your dreams.",
+            "Your spirit harmonizes with the beauty of the world."
+        ]
+        if style == "Gentle":
+            return random.choice(gentle)
+        elif style == "Playful":
+            return random.choice(playful)
+        elif style == "Poetic":
+            return random.choice(poetic)
+        else:
+            return "You are awesome!"
+
+    def show_affirmation(self):
+        affirmation = self.get_affirmation()
+        QMessageBox.information(self, "Affirmation", affirmation)
+
+        # Settings Tab
+        settings_tab = QWidget()
+        settings_layout = QVBoxLayout()
+        settings_tab.setLayout(settings_layout)
+
+        theme_label = QLabel("Theme Mode")
+        theme_label.setFont(QFont("Arial", 14))
+        settings_layout.addWidget(theme_label)
+
+        theme_buttons = QHBoxLayout()
+        for mode in ["Cozy", "Focused", "Ambient"]:
+            btn = QPushButton(mode)
+            btn.clicked.connect(lambda _, m=mode: self.apply_theme(m))
+            theme_buttons.addWidget(btn)
+        settings_layout.addLayout(theme_buttons)
+
+        login_label = QLabel("Navidrome Login")
+        login_label.setFont(QFont("Arial", 14))
+        settings_layout.addWidget(login_label)
+
+        self.server_input = QLineEdit()
+        self.server_input.setPlaceholderText("Server URL (e.g. http://localhost:4533)")
+        self.username_input = QLineEdit()
+        self.username_input.setPlaceholderText("Username")
+        self.password_input = QLineEdit()
+        self.password_input.setPlaceholderText("Password")
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.server_input.setText(self.config.get("server", ""))
+        self.username_input.setText(self.config.get("username", ""))
+        self.password_input.setText(self.config.get("password", ""))
+
+        self.apply_theme(self.config.get("theme", "Cozy"))
+        self.affirmation_style = self.config.get("affirmation_style", "Gentle")
+
+        settings_layout.addWidget(self.server_input)
+        settings_layout.addWidget(self.username_input)
+        settings_layout.addWidget(self.password_input)
+
+        connect_button = QPushButton("Connect to Navidrome")
+        connect_button.clicked.connect(self.connect_to_navidrome)
+        settings_layout.addWidget(connect_button)
+
+        offline_label = QLabel("Offline Mode")
+        offline_label.setFont(QFont("Arial", 14))
+        settings_layout.addWidget(offline_label)
+
+        offline_toggle = QPushButton("Enable Offline Mode")
+        offline_toggle.clicked.connect(self.toggle_offline_mode)
+        settings_layout.addWidget(offline_toggle)
+
+        affirm_label = QLabel("Affirmation Style")
+        affirm_label.setFont(QFont("Arial", 14))
+        settings_layout.addWidget(affirm_label)
+
+        affirm_buttons = QHBoxLayout()
+        for style in ["Gentle", "Playful", "Poetic"]:
+            btn = QPushButton(style)
+            btn.clicked.connect(lambda _, s=style: self.set_affirmation_style(s))
+            affirm_buttons.addWidget(btn)
+        settings_layout.addLayout(affirm_buttons)
+
     # toggle offline mode
 
     def toggle_offline_mode(self):

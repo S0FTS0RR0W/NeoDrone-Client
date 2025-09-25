@@ -422,18 +422,45 @@ class MainWindow(QMainWindow):
         artist = item.data(Qt.ItemDataRole.UserRole)
         name = artist.get("name", "Unknown Artist")
         albums = artist.get("albumCount", 0)
-        message = f"🎤 {name}\nAlbums available: {albums}\n\nFeeling inspired?"
+        message = f"{name}\nAlbums available: {albums}\n\nFeeling inspired?"
         #QMessageBox.information(self, "Artist Selected", message)
 
     # Apply theme
 
     def apply_theme(self, mode):
         if mode == "Cozy":
-            self.setStyleSheet("QMainWindow { background-color: #fbeec1; }")
+            self.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 1, y2: 1,
+                    stop: 0 #fbeec1,
+                    stop: 1 #ffd6a5
+                );
+                color: black;
+            }
+        """)
         elif mode == "Focused":
-            self.setStyleSheet("QMainWindow { background-color: #d0e6f6; }")
+            self.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 1, y2: 1,
+                    stop: 0 #d0e6f6,
+                    stop: 1 #a0c4ff
+                );
+                color: black;
+            }
+        """)
         elif mode == "Ambient":
-            self.setStyleSheet("QMainWindow { background-color: #2e2e2e; color: white; }")
+            self.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 1, y2: 1,
+                    stop: 0 #2e2e2e,
+                    stop: 1 #4b4b4b
+                );
+                color: white;
+            }
+        """)
 
         self.config["theme"] = mode
         save_config(self.config)

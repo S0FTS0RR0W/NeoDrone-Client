@@ -282,9 +282,10 @@ class MainWindow(QMainWindow):
         self.password_input.setText(self.config.get("password", ""))
 
 
-    # Set initial theme and affirmation style
-    self.apply_theme(self.config.get("theme", "Cozy"))
-    self.affirmation_style = self.config.get("affirmation_style", "Gentle")
+
+        # Set initial theme and affirmation style
+        self.apply_theme(self.config.get("theme", "Cozy"))
+        self.affirmation_style = self.config.get("affirmation_style", "Gentle")
 
         settings_layout.addWidget(self.server_input)
         settings_layout.addWidget(self.username_input)

@@ -12,6 +12,9 @@ from PyQt6.QtCore import pyqtProperty, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QColor, QPaintEvent, QPainter
 
 class AnimatedButton(QPushButton):
+    """
+    QPushButton subclass with animated background color transitions on hover.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._bg_color = QColor("#3a3a3a")
@@ -52,18 +55,23 @@ class AnimatedButton(QPushButton):
         self.update()
 
     bgColor = pyqtProperty(QColor, fget=getBgColor, fset=setBgColor)
+
 class MainWindow(QMainWindow):
+    """
+    Main application window for the Navidrome Comfort Client.
+    Handles UI setup, theming, playback, and user interactions.
+    """
     def __init__(self):
         super().__init__()
 
+        # Load persistent configuration
         self.config = load_config()
 
         self.setWindowTitle("Navidrome Comfort Client")
         self.resize(800, 600)
         self.setMinimumSize(600, 400)
 
-        # Auto connect logic
-
+        # Attempt auto-connect to Navidrome if credentials are saved
         server = self.config.get("server")
         username = self.config.get("username")
         password = self.config.get("password")
@@ -80,39 +88,37 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 print(f"Auto-connect error: {e}")
 
-
         self.offline_enabled = self.config.get("offline", False)
         self.affirmation_style = "Gentle"
 
         self.setup_ui()
 
+    def resizeEvent(self, event):
+        """
+        Ensure the background image always fills the window when resized.
+        """
+        if hasattr(self, 'bg_label') and hasattr(self, 'bg_pixmap'):
+            self.bg_label.setPixmap(self.bg_pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding))
+            self.bg_label.setGeometry(0, 0, self.width(), self.height())
+        super().resizeEvent(event)
+
+
 
     def setup_ui(self):
+        """
+        Set up the main UI, tabs, and widgets.
+        """
         # Enable UI Transparency
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setStyleSheet("background: transparent;\n"
-            "QPushButton {\n"
-            "    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);\n"
-            "    border-radius: 8px;\n"
-            "    background: #3a3a3a;\n"
-            "    color: white;\n"
-            "    padding: 8px 16px;\n"
-            "    font-weight: bold;\n"
-            "} \n"
-            "QPushButton:hover {\n"
-            "    background: #66aaff;\n"
-            "    color: #fff;\n"
-            "    box-shadow: 0 4px 16px rgba(102,170,255,0.2);\n"
-            "    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);\n"
-            "}\n"
-        )
+        # Initial style (will be overridden by theme)
+        self.setStyleSheet("background: transparent;")
 
-        # Background image using QLabel
-        bg_label = QLabel(self)
-        bg_pixmap = QPixmap("assets/background.jpg")
-        bg_label.setPixmap(bg_pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding))
-        bg_label.setGeometry(0, 0, self.width(), self.height())
-        bg_label.lower()
+        # Background image using QLabel (resizes with window)
+        self.bg_label = QLabel(self)
+        self.bg_pixmap = QPixmap("assets/background.jpg")
+        self.bg_label.setPixmap(self.bg_pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding))
+        self.bg_label.setGeometry(0, 0, self.width(), self.height())
+        self.bg_label.lower()
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -275,8 +281,10 @@ class MainWindow(QMainWindow):
         self.username_input.setText(self.config.get("username", ""))
         self.password_input.setText(self.config.get("password", ""))
 
-        self.apply_theme(self.config.get("theme", "Cozy"))
-        self.affirmation_style = self.config.get("affirmation_style", "Gentle")
+
+    # Set initial theme and affirmation style
+    self.apply_theme(self.config.get("theme", "Cozy"))
+    self.affirmation_style = self.config.get("affirmation_style", "Gentle")
 
         settings_layout.addWidget(self.server_input)
         settings_layout.addWidget(self.username_input)
@@ -343,70 +351,11 @@ class MainWindow(QMainWindow):
             return "You are awesome!"
 
     def show_affirmation(self):
+        """
+        Show a random affirmation in a message box.
+        """
         affirmation = self.get_affirmation()
         QMessageBox.information(self, "Affirmation", affirmation)
-
-        # Settings Tab
-        settings_tab = QWidget()
-        settings_layout = QVBoxLayout()
-        settings_tab.setLayout(settings_layout)
-
-        theme_label = QLabel("Theme Mode")
-        theme_label.setFont(QFont("Arial", 14))
-        settings_layout.addWidget(theme_label)
-
-        theme_buttons = QHBoxLayout()
-        for mode in ["Cozy", "Focused", "Ambient"]:
-            btn = QPushButton(mode)
-            btn.clicked.connect(lambda _, m=mode: self.apply_theme(m))
-            theme_buttons.addWidget(btn)
-        settings_layout.addLayout(theme_buttons)
-
-        login_label = QLabel("Navidrome Login")
-        login_label.setFont(QFont("Arial", 14))
-        settings_layout.addWidget(login_label)
-
-        self.server_input = QLineEdit()
-        self.server_input.setPlaceholderText("Server URL (e.g. http://localhost:4533)")
-        self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Username")
-        self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("Password")
-        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-
-        self.server_input.setText(self.config.get("server", ""))
-        self.username_input.setText(self.config.get("username", ""))
-        self.password_input.setText(self.config.get("password", ""))
-
-        self.apply_theme(self.config.get("theme", "Cozy"))
-        self.affirmation_style = self.config.get("affirmation_style", "Gentle")
-
-        settings_layout.addWidget(self.server_input)
-        settings_layout.addWidget(self.username_input)
-        settings_layout.addWidget(self.password_input)
-
-        connect_button = QPushButton("Connect to Navidrome")
-        connect_button.clicked.connect(self.connect_to_navidrome)
-        settings_layout.addWidget(connect_button)
-
-        offline_label = QLabel("Offline Mode")
-        offline_label.setFont(QFont("Arial", 14))
-        settings_layout.addWidget(offline_label)
-
-        offline_toggle = QPushButton("Enable Offline Mode")
-        offline_toggle.clicked.connect(self.toggle_offline_mode)
-        settings_layout.addWidget(offline_toggle)
-
-        affirm_label = QLabel("Affirmation Style")
-        affirm_label.setFont(QFont("Arial", 14))
-        settings_layout.addWidget(affirm_label)
-
-        affirm_buttons = QHBoxLayout()
-        for style in ["Gentle", "Playful", "Poetic"]:
-            btn = QPushButton(style)
-            btn.clicked.connect(lambda _, s=style: self.set_affirmation_style(s))
-            affirm_buttons.addWidget(btn)
-        settings_layout.addLayout(affirm_buttons)
 
     # toggle offline mode
 
@@ -486,8 +435,12 @@ class MainWindow(QMainWindow):
     # Apply theme
 
     def apply_theme(self, mode):
+        """
+        Apply a visual theme to the application.
+        This sets both the background and button styles for the whole window.
+        """
         if mode == "Cozy":
-            self.setStyleSheet("""
+            widget_style = """
             QWidget {
                 background: qlineargradient(
                     x1: 0, y1: 0, x2: 1, y2: 1,
@@ -496,9 +449,23 @@ class MainWindow(QMainWindow):
                 );
                 color: black;
             }
-        """)
+            """
+            button_style = """
+            QPushButton {
+                background-color: #fbeec1;
+                color: black;
+                border: 2px solid #ffd6a5;
+                padding: 6px;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #ffd6a5;
+                color: white;
+                border: 2px solid #ffb347;
+            }
+            """
         elif mode == "Focused":
-            self.setStyleSheet("""
+            widget_style = """
             QWidget {
                 background: qlineargradient(
                     x1: 0, y1: 0, x2: 1, y2: 1,
@@ -507,9 +474,23 @@ class MainWindow(QMainWindow):
                 );
                 color: black;
             }
-        """)
+            """
+            button_style = """
+            QPushButton {
+                background-color: #d0e6f6;
+                color: black;
+                border: 2px solid #a0c4ff;
+                padding: 6px;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #a0c4ff;
+                color: white;
+                border: 2px solid #5390d9;
+            }
+            """
         elif mode == "Ambient":
-            self.setStyleSheet("""
+            widget_style = """
             QWidget {
                 background: qlineargradient(
                     x1: 0, y1: 0, x2: 1, y2: 1,
@@ -518,32 +499,43 @@ class MainWindow(QMainWindow):
                 );
                 color: white;
             }
-        """)
+            """
+            button_style = """
+            QPushButton {
+                background-color: #2e2e2e;
+                color: white;
+                border: 2px solid #4b4b4b;
+                padding: 6px;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #4b4b4b;
+                color: #66aaff;
+                border: 2px solid #66aaff;
+            }
+            """
+        else:
+            widget_style = ""
+            button_style = ""
 
+        # Combine and apply both styles
+        self.setStyleSheet(widget_style + "\n" + button_style)
         self.config["theme"] = mode
         save_config(self.config)
-        self.setStyleSheet("""
-    QPushButton {
-        background-color: #fbeec1;
-        color: black;
-        border: 2px solid #ffd6a5;
-        padding: 6px;
-        border-radius: 8px;
-    }
-    QPushButton:hover {
-        background-color: #ffd6a5;
-        color: white;
-        border: 2px solid #ffb347;
-    }
-    """)
 
     def set_affirmation_style(self, style):
+        """
+        Set the affirmation style and persist it in the config.
+        """
         self.affirmation_style = style
         self.config["affirmation_style"] = style
         save_config(self.config)
         QMessageBox.information(self, "Affirmation Style", f"Affirmation style set to: {style}")
 
     def play_stream(self, track_id, cover_id=None):
+        """
+        Play a track by its ID (or song dict), update album art, and update UI.
+        """
         if not self.api:
             QMessageBox.warning(self, "Not Connected", "Connect to Navidrome first.")
             return
@@ -615,6 +607,9 @@ class MainWindow(QMainWindow):
         # Start timer to update seek bar
         self.start_seek_timer()
     def start_seek_timer(self):
+        """
+        Start a QTimer to update the seek bar every 500ms.
+        """
         # Use QTimer to update seek bar
         from PyQt6.QtCore import QTimer
         if hasattr(self, "seek_timer") and self.seek_timer:
@@ -624,6 +619,9 @@ class MainWindow(QMainWindow):
         self.seek_timer.start(500)
 
     def update_seek_bar(self):
+        """
+        Update the seek bar position based on current playback.
+        """
         if hasattr(self, "player") and self.player:
             try:
                 length = self.player.get_length()  # ms
@@ -635,6 +633,9 @@ class MainWindow(QMainWindow):
                 pass
 
     def seek_position(self, value):
+        """
+        Seek to a position in the current track based on slider value.
+        """
         if hasattr(self, "player") and self.player:
             length = self.player.get_length()
             if length > 0:
@@ -644,6 +645,9 @@ class MainWindow(QMainWindow):
     # Get all artists
 
     def get_all_artists(self):
+        """
+        Return a list of all artist dicts from the API.
+        """
         if not self.api:
             QMessageBox.warning(self, "Not Connected", "Please connect to Navidrome first.")
             return []
@@ -662,6 +666,9 @@ class MainWindow(QMainWindow):
 
         
     def get_album(self, album_id):
+        """
+        Return album dict for a given album_id from the API.
+        """
         if not self.api:
             QMessageBox.warning(self, "Not Connected", "Please connect to Navidrome first.")
             return None
@@ -677,6 +684,9 @@ class MainWindow(QMainWindow):
     #Play first track
 
     def play_first_track(self):
+        """
+        Play the first track of the first album of the selected artist.
+        """
         selected_item = self.artist_list.currentItem()
         if not selected_item:
             QMessageBox.warning(self, "No Artist Selected", "Please select an artist first.")
@@ -716,6 +726,9 @@ class MainWindow(QMainWindow):
 
 
     def toggle_play_pause(self):
+        """
+        Toggle play/pause for the current track.
+        """
         if hasattr(self, "player") and self.player:
             if self.player.is_playing():
                 self.player.pause()
@@ -723,6 +736,9 @@ class MainWindow(QMainWindow):
                 self.player.play()
 
     def play_next_track(self):
+        """
+        Play the next track in the current album.
+        """
         # Play next track in current album
         if hasattr(self, "current_album_tracks") and self.current_album_tracks:
             idx = getattr(self, "current_track_index", 0)
@@ -736,6 +752,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "No Album", "No album loaded.")
 
     def play_previous_track(self):
+        """
+        Play the previous track in the current album.
+        """
         # Play previous track in current album
         if hasattr(self, "current_album_tracks") and self.current_album_tracks:
             idx = getattr(self, "current_track_index", 0)
